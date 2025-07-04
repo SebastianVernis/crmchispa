@@ -1,0 +1,22 @@
+# Dependencias de Node.js
+/backend/node_modules
+node_modules/
+
+# Archivo de variables de entorno (Contiene secretos)
+/backend/.env
+.env.production
+
+# Logs
+logs/
+*.log
+
+# Build artifacts
+dist/
+build/
+.cache/
+.tmp/
+
+# Database files
+*.sqlite
+*.db
+.env.local

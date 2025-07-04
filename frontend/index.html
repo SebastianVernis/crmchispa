@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Twilio - Advanced Spoof Calling System</title>
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="./css/styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📞</text></svg>">
+</head>
+<body>
+    <!-- Super Admin Setup Container -->
+    <div id="setup-superadmin-container" class="container login-container hidden">
+        <h1><i class="fas fa-user-shield"></i> Configurar Super Administrador</h1>
+        <p>Crea la primera cuenta de super administrador para el sistema.</p>
+
+        <form id="setup-superadmin-form">
+            <input type="text" id="setup-username" placeholder="Usuario Super Admin" required autocomplete="username">
+            <input type="password" id="setup-password" placeholder="Contraseña" required autocomplete="new-password">
+            <input type="password" id="setup-confirm-password" placeholder="Confirmar Contraseña" required autocomplete="new-password">
+            <button type="submit">
+                <i class="fas fa-user-plus"></i> Crear Super Administrador
+            </button>
+        </form>
+        <p id="setup-message" style="margin-top: 15px; color: var(--danger-color);"></p>
+    </div>
+
+    <!-- Login Container -->
+    <div id="login-container" class="container login-container hidden"> <!-- Initially hidden, app.js will show it or setup -->
+        <h1><i class="fas fa-phone-alt"></i> CRM Twilio</h1>
+        <p>Advanced Spoof Calling System</p>
+        
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Usuario" required autocomplete="username">
+            <input type="password" id="password" placeholder="Contraseña" required autocomplete="current-password">
+            <button type="submit">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </button>
+        </form>
+        
+        <!--
+        <div style="margin-top: 20px; font-size: 12px; color: #666;">
+            <p><strong>Credenciales de Demostración (Eliminadas por seguridad):</strong></p>
+            <p>Admin: admin / admin123</p>
+            <p>Asesor: asesor / asesor123</p>
+        </div>
+        -->
+    </div>
+
+    <!-- Main Application Container -->
+    <div id="app-container" class="container hidden">
+        <!-- Header -->
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div>
+                <h1><i class="fas fa-phone-alt"></i> CRM Twilio Pro</h1>
+                <p>Advanced Spoof Calling & Communication System</p>
+            </div>
+            <div style="text-align: right; display: flex; align-items: center; gap: 15px;">
+                <span id="user-info" style="font-weight: 500;"></span>
+                <button id="open-user-management-btn" class="btn-secondary superadmin-only hidden" title="Gestionar Usuarios">
+                    <i class="fas fa-users-cog"></i>
+                </button>
+                <button id="open-api-config-btn" class="btn-secondary admin-only hidden" title="Configuración de API">
+                    <i class="fas fa-cogs"></i>
+                </button>
+                <button id="logout-btn" class="btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <span id="total-contacts" class="stat-value">0</span>
+                <span class="stat-label">Total Contactos</span>
+            </div>
+            <div class="stat-card">
+                <span id="contacted-today" class="stat-value">0</span>
+                <span class="stat-label">Contactados Hoy</span>
+            </div>
+            <div class="stat-card">
+                <span id="pending-followup" class="stat-value">0</span>
+                <span class="stat-label">Seguimiento Pendiente</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">
+                    <i class="fas fa-shield-alt" style="color: #1e8e3e;"></i>
+                </span>
+                <span class="stat-label">Sistema Seguro</span>
+            </div>
+        </div>
+
+        <!-- Standard Communication Module -->
+        <div class="module">
+            <h2><i class="fas fa-comments"></i> Comunicación Estándar</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <h3>Gestión de Contactos</h3>
+                <div id="contact-management-controls">
+                    <input type="text" id="search-contacts" placeholder="Buscar contactos...">
+                    <select id="status-filter">
+                        <option value="all">Todos los estados</option>
+                        <option value="New">Pendiente (Nuevo)</option>
+                        <option value="Contacted">Contactado</option>
+                        <option value="FollowUp">Requiere Seguimiento</option>
+                        <option value="Not Interested">No Interesado</option>
+                        <option value="Converted">Convertido</option>
+                    </select>
+                    <button class="btn-success admin-only">
+                        <i class="fas fa-plus"></i> Nuevo Contacto
+                    </button>
+                    <button class="btn-secondary">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+
+            <div id="table-container">
+                <table id="contacts-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Estado</th>
+                            <th>Notas</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Contacts will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Status Breakdown -->
+        <div class="module">
+            <h3><i class="fas fa-chart-pie"></i> Desglose por Estado</h3>
+            <ul id="status-breakdown">
+                <!-- Status breakdown will be populated by JavaScript -->
+            </ul>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="module admin-only">
+            <h3><i class="fas fa-tachometer-alt"></i> Métricas de Rendimiento</h3>
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <span class="stat-value">98.5%</span>
+                    <span class="stat-label">Uptime</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">45ms</span>
+                    <span class="stat-label">Latencia Promedio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">1,247</span>
+                    <span class="stat-label">Llamadas Hoy</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">892</span>
+                    <span class="stat-label">SMS Enviados</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="module admin-only">
+            <h3><i class="fas fa-heartbeat"></i> Estado del Sistema</h3>
+            <div class="system-health-grid">
+                <div style="text-align: center;">
+                    <i class="fas fa-server" style="font-size: 2em; color: #1e8e3e; margin-bottom: 8px;"></i>
+                    <div><strong>Servidor</strong></div>
+                    <div style="color: #1e8e3e;">Operativo</div>
+                </div>
+                <div style="text-align: center;">
+                    <i class="fas fa-database" style="font-size: 2em; color: #1e8e3e; margin-bottom: 8px;"></i>
+                    <div><strong>Base de Datos</strong></div>
+                    <div style="color: #1e8e3e;">Conectada</div>
+                </div>
+                <div style="text-align: center;">
+                    <i class="fas fa-cloud" style="font-size: 2em; color: #1e8e3e; margin-bottom: 8px;"></i>
+                    <div><strong>Twilio API</strong></div>
+                    <div style="color: #1e8e3e;">Activa</div>
+                </div>
+                <div style="text-align: center;">
+                    <i class="fas fa-shield-alt" style="font-size: 2em; color: #1e8e3e; margin-bottom: 8px;"></i>
+                    <div><strong>Seguridad</strong></div>
+                    <div style="color: #1e8e3e;">Protegido</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management Module -->
+        <div id="user-management-module" class="module hidden superadmin-only">
+            <h2><i class="fas fa-users-cog"></i> Gestión de Usuarios</h2>
+            <button id="add-new-user-btn" class="btn-success" style="margin-bottom: 20px;">
+                <i class="fas fa-user-plus"></i> Agregar Nuevo Usuario
+            </button>
+
+            <div id="user-table-container">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Rol</th>
+                            <th>Estado (Activo)</th>
+                            <th>ID Asesor</th>
+                            <th>Último Login</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- User rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modal or Form for Add/Edit User -->
+            <div id="user-form-modal" class="overlay hidden">
+                <div class="modal-content">
+                    <h3 id="user-form-title">Agregar Usuario</h3>
+                    <form id="user-form">
+                        <input type="hidden" id="user-id">
+                        <div>
+                            <label for="user-username">Username:</label>
+                            <input type="text" id="user-username" required>
+                        </div>
+                        <div>
+                            <label for="user-password">Password (dejar en blanco para no cambiar):</label>
+                            <input type="password" id="user-password" autocomplete="new-password">
+                        </div>
+                        <div>
+                            <label for="user-role">Rol:</label>
+                            <select id="user-role" required>
+                                <option value="asesor">Asesor</option>
+                                <option value="admin">Admin</option>
+                                <!-- Superadmin no se puede asignar desde aquí -->
+                            </select>
+                        </div>
+                        <div>
+                            <label for="user-advisorId">ID Asesor (opcional, si el rol es asesor):</label>
+                            <input type="number" id="user-advisorId" placeholder="ID numérico del asesor">
+                        </div>
+                        <div>
+                            <label>
+                                <input type="checkbox" id="user-isActive" checked> Activo
+                            </label>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" id="user-form-cancel-btn" class="btn-secondary">Cancelar</button>
+                            <button type="submit" class="btn-success">Guardar Usuario</button>
+                        </div>
+                         <p id="user-form-message" style="margin-top: 10px; color: var(--danger-color);"></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- API and AI Integration Configuration Panel -->
+        <div id="api-config-panel" class="module hidden admin-only">
+            <h2><i class="fas fa-cogs"></i> Configuración de APIs e IA</h2>
+            <form id="api-config-form">
+                <h3>Twilio</h3>
+                <input type="text" id="twilio-sid" placeholder="Account SID">
+                <input type="password" id="twilio-token" placeholder="Auth Token">
+                <input type="text" id="twilio-phone" placeholder="Phone Number">
+
+                <h3>Gemini</h3>
+                <input type="password" id="gemini-api-key" placeholder="API Key">
+                <input type="text" id="gemini-url" placeholder="Endpoint URL">
+
+                <h3>Otras Integraciones de IA</h3>
+                <div id="extra-ia-list" style="margin-bottom: 15px;"></div>
+                <button type="button" id="add-ia-btn" class="btn-secondary"><i class="fas fa-plus"></i> Agregar Nueva IA</button>
+                <hr style="border-color: var(--border-color); margin: 20px 0;">
+                <button type="submit" class="btn-success"><i class="fas fa-save"></i> Guardar Configuración</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script src="./js/config.js"></script>
+    <script src="./js/app.js"></script>
+</body>
+</html>
+
