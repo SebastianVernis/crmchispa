@@ -91,7 +91,7 @@ frontend/
 
 1.  **Clonar el Repositorio**:
     ```bash
-    git clone https://github.com/tu-usuario/tu-repositorio.git # Reemplaza con la URL real
+    git clone https://github.com/SebastianVernis/crmchispa.git # Reemplaza con la URL real
     cd nombre-del-repositorio
     ```
 
