@@ -91,8 +91,8 @@ frontend/
 
 1.  **Clonar el Repositorio**:
     ```bash
-    git clone https://github.com/SebastianVernis/crmchispa.git # Reemplaza con la URL real
-    cd nombre-del-repositorio
+    git clone https://github.com/SebastianVernis/crmchispa.git 
+    cd crmchispa
     ```
 
 2.  **Configurar Variables de Entorno (Backend)**:
